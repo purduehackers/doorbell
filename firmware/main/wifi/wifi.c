@@ -58,7 +58,7 @@ static void wifi_event_handler(
                 took_sleep_inhibit = true;
             }
 
-            // stop_socket();
+            stop_socket();
 
             update_wifi_status(WifiStatus_Connecting);
 
@@ -83,7 +83,7 @@ static void wifi_event_handler(
                 took_sleep_inhibit = false;
             }
 
-            // start_socket();
+            start_socket();
 
             update_wifi_status(WifiStatus_Connected);
         }
@@ -97,7 +97,7 @@ static void wifi_event_handler(
                 took_sleep_inhibit = true;
             }
 
-            // stop_socket();
+            stop_socket();
 
             update_wifi_status(WifiStatus_Connecting);
         }
