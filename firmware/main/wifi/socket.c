@@ -180,6 +180,10 @@ void ring_doorbell(bool wait_for_connection)
             display_error(RingError_SocketNotReady);
             update_ringing_status(RingingStatus_Off);
 
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+
+            xEventGroupSetBits(doorbell_events, DOORBELL_FINISHED_RINGING);
+
             return;
         }
     }
@@ -189,6 +193,10 @@ void ring_doorbell(bool wait_for_connection)
         {
             display_error(RingError_NoSocket);
             update_ringing_status(RingingStatus_Off);
+
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+
+            xEventGroupSetBits(doorbell_events, DOORBELL_FINISHED_RINGING);
 
             return;
         }
@@ -200,12 +208,20 @@ void ring_doorbell(bool wait_for_connection)
             display_error(RingError_SocketNotReady);
             update_ringing_status(RingingStatus_Off);
 
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+
+            xEventGroupSetBits(doorbell_events, DOORBELL_FINISHED_RINGING);
+
             return;
         }
         if (!(event_group_bits & SOCKET_CONNECTED))
         {
             display_error(RingError_SocketNotConnected);
             update_ringing_status(RingingStatus_Off);
+
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+
+            xEventGroupSetBits(doorbell_events, DOORBELL_FINISHED_RINGING);
 
             return;
         }
@@ -215,6 +231,10 @@ void ring_doorbell(bool wait_for_connection)
     {
         display_error(RingError_SendFailed);
         update_ringing_status(RingingStatus_Off);
+
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+
+        xEventGroupSetBits(doorbell_events, DOORBELL_FINISHED_RINGING);
 
         return;
     }

@@ -14,11 +14,18 @@
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
+#include "esp_eap_client.h"
 
 // TODO: pull from .env
-#define EXAMPLE_ESP_WIFI_SSID               "ssid"
-#define EXAMPLE_ESP_WIFI_PASS               "pass"
-#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD   WIFI_AUTH_WPA2_PSK
+// #define WIFI_USE_WPA2_PSK
+// #define WIFI_SSID   "ssid"
+// #define WIFI_PASS   "pass"
+#define WIFI_USE_WPA2_ENTERPRISE
+#define WIFI_SSID           "test"
+#define WIFI_EAP_USERNAME   "test"
+#define WIFI_EAP_PASSWORD   "test"
+#define WIFI_EAP_IDENTITY   "test"
+#define WIFI_EAP_DOMAIN     "test"
 
 static const char *TAG = "wifi";
 
@@ -51,7 +58,7 @@ static void wifi_event_handler(
                 took_sleep_inhibit = true;
             }
 
-            stop_socket();
+            // stop_socket();
 
             update_wifi_status(WifiStatus_Connecting);
 
@@ -76,7 +83,7 @@ static void wifi_event_handler(
                 took_sleep_inhibit = false;
             }
 
-            start_socket();
+            // start_socket();
 
             update_wifi_status(WifiStatus_Connected);
         }
@@ -90,7 +97,7 @@ static void wifi_event_handler(
                 took_sleep_inhibit = true;
             }
 
-            stop_socket();
+            // stop_socket();
 
             update_wifi_status(WifiStatus_Connecting);
         }
@@ -137,15 +144,40 @@ void start_wifi()
 
     ESP_LOGI(TAG, "setting wifi config...");
 
+    #ifdef WIFI_USE_WPA2_PSK
+    ESP_LOGI(TAG, "using PSK...");
+
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = EXAMPLE_ESP_WIFI_SSID,
-            .password = EXAMPLE_ESP_WIFI_PASS,
-            .threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD,
+            .ssid = WIFI_SSID,
+            .password = WIFI_PASS,
+            .threshold.authmode = WIFI_USE_WPA2_PSK,
+        },
+    };
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    #endif
+
+    #ifdef WIFI_USE_WPA2_ENTERPRISE
+    ESP_LOGI(TAG, "using WPA2 Enterprise with PEAP...");
+
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = WIFI_SSID,
         },
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+
+    ESP_ERROR_CHECK(esp_eap_client_set_identity((uint8_t *) WIFI_EAP_IDENTITY, strlen(WIFI_EAP_IDENTITY)));
+    ESP_ERROR_CHECK(esp_eap_client_set_username((uint8_t *) WIFI_EAP_USERNAME, strlen(WIFI_EAP_USERNAME)));
+    ESP_ERROR_CHECK(esp_eap_client_set_password((uint8_t *) WIFI_EAP_PASSWORD, strlen(WIFI_EAP_PASSWORD)));
+    ESP_ERROR_CHECK(esp_eap_client_set_domain_name(WIFI_EAP_DOMAIN));
+
+    ESP_ERROR_CHECK(esp_wifi_sta_enterprise_enable());
+    #endif
 
     ESP_LOGI(TAG, "starting wifi...");
 
