@@ -111,17 +111,12 @@ void start_socket()
 {
     xTimerStop(websocket_retry_timer, 0);
 
-    // tls_config = (esp_tls_cfg_t) {
-    //     .,
-    // };
-
     ESP_LOGI(TAG, "initializing socket config...");
 
     websocket_config = (esp_websocket_client_config_t) {
         .uri = "wss://api.purduehackers.com/doorbell",
 
         .user_agent = "PurdueHackers/Doorbell",
-        // .headers = "Sec-WebSocket-Accept",
 
         .network_timeout_ms = 10000,
         .reconnect_timeout_ms = 1000,

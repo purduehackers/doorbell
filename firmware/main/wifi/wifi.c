@@ -29,7 +29,8 @@
 
 static const char *TAG = "wifi";
 
-static bool took_sleep_inhibit;
+// ok so turns out refusing to sleep without a wifi connection is a bad idea
+// static bool took_sleep_inhibit;
 
 static void wifi_event_handler(
     void* arg,
@@ -52,11 +53,11 @@ static void wifi_event_handler(
         {
             ESP_LOGI(TAG, "failed to connect to an access point");
 
-            if (!took_sleep_inhibit)
-            {
-                take_sleep_inhibit();
-                took_sleep_inhibit = true;
-            }
+            // if (!took_sleep_inhibit)
+            // {
+            //     take_sleep_inhibit();
+            //     took_sleep_inhibit = true;
+            // }
 
             stop_socket();
 
@@ -77,11 +78,11 @@ static void wifi_event_handler(
 
             ESP_LOGI(TAG, "connected to access point, got ip: " IPSTR, IP2STR(&event->ip_info.ip));
 
-            if (took_sleep_inhibit)
-            {
-                return_sleep_inhibit();
-                took_sleep_inhibit = false;
-            }
+            // if (took_sleep_inhibit)
+            // {
+            //     return_sleep_inhibit();
+            //     took_sleep_inhibit = false;
+            // }
 
             start_socket();
 
@@ -91,11 +92,11 @@ static void wifi_event_handler(
         {
             ESP_LOGI(TAG, "connected to access point, lost ip");
 
-            if (!took_sleep_inhibit)
-            {
-                take_sleep_inhibit();
-                took_sleep_inhibit = true;
-            }
+            // if (!took_sleep_inhibit)
+            // {
+            //     take_sleep_inhibit();
+            //     took_sleep_inhibit = true;
+            // }
 
             stop_socket();
 
@@ -106,6 +107,8 @@ static void wifi_event_handler(
 
 void start_wifi()
 {
+    init_socket_state();
+
     ESP_LOGI(TAG, "initializing netif...");
 
     ESP_ERROR_CHECK(esp_netif_init());
@@ -181,17 +184,15 @@ void start_wifi()
 
     ESP_LOGI(TAG, "starting wifi...");
 
-    took_sleep_inhibit = true;
+    // took_sleep_inhibit = true;
 
-    take_sleep_inhibit();
+    // take_sleep_inhibit();
 
     ESP_ERROR_CHECK(esp_wifi_start());
 
     esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
     // i give up on this for now, it breaks wifi completely
     // esp_sleep_enable_wifi_beacon_wakeup();
-
-    init_socket_state();
 
     ESP_LOGI(TAG, "initialization finished");
 }
